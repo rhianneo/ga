@@ -1,0 +1,14 @@
+/* resources/css/dashboard.css */
+.dashboard {
+    background-color: #f8fafc;
+    padding: 20px;
+}
+
+.gantt-chart {
+    height: 500px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
