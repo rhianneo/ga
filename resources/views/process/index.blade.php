@@ -11,10 +11,11 @@
         $grouped = $processes->groupBy('major_process');
     @endphp
 
-    <div class="mb-4 flex space-x-2">
+    <div class="mb-4 flex space-x-2 border-b">
         @foreach ($appTypes as $type)
             <a href="{{ route('process.index', ['type' => $type]) }}"
-               class="px-4 py-2 rounded-md font-medium {{ $activeType === $type ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700' }}">
+               class="px-4 py-2 rounded-t-md font-medium 
+                    {{ $activeType === $type ? 'bg-blue-500 text-white border-b-4 border-blue-600' : 'bg-gray-200 text-gray-700' }}">
                 {{ $type }}
             </a>
         @endforeach
@@ -23,10 +24,12 @@
     {{-- Add New Process --}}
     <div class="mb-4">
         <a href="{{ route('process.create', ['type' => $activeType]) }}"
-           class="bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded-md">
+        class="bg-green-500 hover:bg-green-200 text-white font-semibold px-6 py-3 border border-green-200">
             + Add Step
         </a>
     </div>
+
+
 
     {{-- Success Message --}}
     @if(session('success'))
@@ -78,3 +81,4 @@
     </table>
 </div>
 @endsection
+

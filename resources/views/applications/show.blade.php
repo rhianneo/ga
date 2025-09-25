@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="flex justify-center items-center min-h-screen bg-gray-100">
+<div class="flex justify-center items-center min-h-screen bg-blue-100">
     <div class="w-full max-w-lg bg-white p-8 rounded-lg shadow-lg">
         <h1 class="text-2xl font-bold mb-4 text-center">Application Details: {{ $application->name }}</h1>
 
@@ -36,10 +36,11 @@
             </div>
 
             <!-- Days Before Expiry -->
-            <div class="{{ \Carbon\Carbon::now()->diffInDays($application->expiry_date) < 60 ? 'text-red-500' : '' }}">
+            <div class="{{ \Carbon\Carbon::today()->diffInDays($application->expiry_date) < 60 ? 'text-red-500' : '' }}">
                 <strong>Days Before Expiry:</strong> 
-                {{ floor(\Carbon\Carbon::now()->diffInDays($application->expiry_date)) }} days
+                {{ floor(\Carbon\Carbon::today()->diffInDays($application->expiry_date)) }} days
             </div>
+
 
             <div>
                 <strong>Status:</strong> {{ $application->status }}
@@ -70,8 +71,8 @@
         printWindow.document.write('img { width: 120px; margin-bottom: 20px; }');
         printWindow.document.write('</style></head><body>');
 
-        // Company Logo
-        printWindow.document.write('<img src="{{ asset("images/toyoflex.png") }}" alt="Toyoflex Logo" />');
+        // Company Logo (explicit URL path)
+        printWindow.document.write('<img src="{{ url('images/toyoflex.png') }}" alt="Toyoflex Logo" />');
         
         // Application Title and Details
         printWindow.document.write('<h3>Application Details for ' + '{{ $application->name }}' + '</h3>');
@@ -98,6 +99,8 @@
         // Automatically trigger the print dialog once the content is ready
         printWindow.print();
     }
+    
+
 </script>
 
 @endsection

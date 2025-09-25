@@ -11,7 +11,7 @@ body {
 }
 
 /* ==========================================
-   Container for the Auth Page
+   Auth Page
 ========================================== */
 .auth-container {
     display: flex;
@@ -26,27 +26,10 @@ body {
     overflow: hidden;
 }
 
-/* ==========================================
-   Logos (Top-left and Top-right)
-========================================== */
-.auth-logo {
-    position: absolute;
-    width: 80px;
-}
+.auth-logo { position: absolute; width: 80px; }
+.auth-top-left { top: 30px; left: 50px; }
+.auth-top-right { top: 30px; right: 50px; }
 
-.auth-top-left {
-    top: 30px;
-    left: 50px;
-}
-
-.auth-top-right {
-    top: 30px;
-    right: 50px;
-}
-
-/* ==========================================
-   Auth Card (Login Box)
-========================================== */
 .auth-card {
     background: rgba(255, 255, 255, 0.88);
     backdrop-filter: blur(12px);
@@ -58,15 +41,11 @@ body {
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
     transition: all 0.3s ease;
 }
-
 .auth-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
 }
 
-/* ==========================================
-   Auth Title
-========================================== */
 .auth-title {
     margin-bottom: 20px;
     color: #1f2937;
@@ -74,9 +53,6 @@ body {
     font-weight: 600;
 }
 
-/* ==========================================
-   Inputs
-========================================== */
 .auth-input {
     width: 100%;
     padding: 12px;
@@ -87,21 +63,14 @@ body {
     font-family: 'Poppins', sans-serif;
     transition: all 0.3s ease;
 }
-
 .auth-input:focus {
     outline: none;
     border-color: #1f2937;
     box-shadow: 0 0 5px rgba(31, 41, 55, 0.3);
 }
 
-/* Input Group (For password toggle etc.) */
-.auth-input-group {
-    position: relative;
-    width: 100%;
-    margin: 5px 0;
-}
+.auth-input-group { position: relative; width: 100%; margin: 5px 0; }
 
-/* Password Toggle Button */
 .auth-toggle-btn {
     position: absolute;
     right: 12px;
@@ -115,9 +84,6 @@ body {
     color: #1f2937;
 }
 
-/* ==========================================
-   Error Messages
-========================================== */
 .auth-error-row {
     display: flex;
     align-items: center;
@@ -129,9 +95,6 @@ body {
     margin-bottom: 8px;
 }
 
-/* ==========================================
-   Submit Button
-========================================== */
 .auth-button {
     width: 100%;
     padding: 12px;
@@ -145,15 +108,11 @@ body {
     transition: all 0.3s ease;
     margin-top: 15px;
 }
-
 .auth-button:hover {
     background: #6fb9e4;
     color: #fff;
 }
 
-/* ==========================================
-   Live Date/Time
-========================================== */
 .auth-datetime {
     position: absolute;
     bottom: 20px;
@@ -166,52 +125,23 @@ body {
     text-shadow: 0px 2px 6px rgba(0, 0, 0, 0.8);
 }
 
-/* ==========================================
-   Session / Status Message
-========================================== */
-.auth-message {
-    margin-top: 12px;
-    color: green;
-    font-weight: 500;
-}
+.auth-message { margin-top: 12px; color: green; font-weight: 500; }
 
-/* ==========================================
-   Footer: Register Link
-========================================== */
 .auth-footer {
     margin-top: 12px;
     font-size: 11px;
     color: #1f2937;
 }
-
-.auth-footer a {
-    color: #1f2937;
-    font-weight: 600;
-    text-decoration: underline;
-    margin-left: 4px;
-}
+.auth-footer a { color: #1f2937; font-weight: 600; text-decoration: underline; margin-left: 4px; }
 
 /* ==========================================
-   General Theme Colors
+   Dashboard & Sidebar
 ========================================== */
-.bg-cloud-200 {
-    background-color: #E1E5E8;
-}
+.bg-cloud-200 { background-color: #E1E5E8; }
+.bg-serene-dark { background-color: #1D3D6B; }
 
-.bg-serene-dark {
-    background-color: #1D3D6B;
-}
-
-/* ==========================================
-   Sidebar Styles
-========================================== */
-.bg-lightblue-100 {
-    background-color: #a7c7e7;
-}
-
-.bg-lightblue-300 {
-    background-color: #6c94b8;
-}
+.bg-lightblue-100 { background-color: #a7c7e7; }
+.bg-lightblue-300 { background-color: #6c94b8; }
 
 .nav-item {
     display: block;
@@ -221,105 +151,27 @@ body {
     transition: all 0.3s ease;
     cursor: pointer;
 }
+.nav-item:hover { color: white; background-color: rgba(255,255,255,0.2); }
 
-.nav-item:hover {
-    color: white;
-}
-
+/* Hover underline animation */
 .nav-item::before,
 .nav-item::after {
     content: '';
     position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    height: 2px;
+    left: 0; bottom: 0;
+    width: 100%; height: 2px;
     background-color: #fff;
     transition: all 0.3s ease;
 }
-
-.nav-item::before {
-    transform: scaleX(0);
-    transform-origin: bottom right;
-}
-
-.nav-item::after {
-    transform: scaleX(0);
-    transform-origin: bottom left;
-}
-
-.nav-item:hover::before {
-    transform: scaleX(1);
-    transform-origin: bottom left;
-}
-
-.nav-item:hover::after {
-    transform: scaleX(1);
-    transform-origin: bottom right;
-}
-
-.nav-item:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-}
+.nav-item::before { transform: scaleX(0); transform-origin: bottom right; }
+.nav-item::after { transform: scaleX(0); transform-origin: bottom left; }
+.nav-item:hover::before { transform: scaleX(1); transform-origin: bottom left; }
+.nav-item:hover::after { transform: scaleX(1); transform-origin: bottom right; }
 
 /* ==========================================
-   Print Styles
+   Pagination
 ========================================== */
-@media print {
-    /* Hide the entire sidebar, top bar, and action buttons */
-    .sidebar, 
-    .topbar,
-    .nav-item,
-    .auth-datetime,
-    .pagination,
-    .actions,
-    .auth-container {
-        display: none;
-    }
-
-    /* Make sure the content is styled for print */
-    body * {
-        visibility: hidden;
-    }
-    #application-table, #application-table * {
-        visibility: visible;
-    }
-    #application-table {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-    }
-
-    /* Center the Toyoflex Logo */
-    .print-header {
-        text-align: center;
-        margin-bottom: 20px;
-    }
-
-    .print-header img {
-        width: 150px;
-        height: auto;
-    }
-
-    /* Make table visible and readable */
-    #application-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    #application-table th, #application-table td {
-        padding: 10px;
-        border: 1px solid #ddd;
-    }
-}
-
-/* ==========================================
-   Pagination Styles
-========================================== */
-.pagination {
-    color: #000 !important; /* Ensure all text inside pagination is black */
-}
-
+.pagination { color: #000 !important; }
 .pagination a {
     padding: 8px 16px;
     background-color: #f1f5f9;
@@ -327,89 +179,17 @@ body {
     border-radius: 5px;
     font-size: 14px;
     font-weight: 500;
-    transition: background-color 0.3s ease, color 0.3s ease;
     text-decoration: none;
+    transition: 0.3s ease;
 }
-
-.pagination .active a {
-    color: #000 !important; /* Ensure active page number is black */
-}
-
-.pagination a:hover {
-    background-color: #6c94b8;
-    color: #fff;
-}
-
-.pagination .disabled {
-    background-color: #e2e2e2;
-    color: #b5b5b5;
-    cursor: not-allowed;
-}
-
-.pagination .active {
-    background-color: #6c94b8;
-    color: #fff;
-    border-radius: 5px;
-}
-
-.pagination .previous, .pagination .next {
-    color: #000 !important;
-    font-weight: 500;
-}
-
-/* Pagination arrow styles */
-.pagination .previous, .pagination .next {
-    padding: 8px 12px;
-    background-color: #f1f5f9;
-    border-radius: 5px;
-    font-size: 14px;
-    color: #1f2937;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.pagination .previous:hover, .pagination .next:hover {
-    background-color: #6c94b8;
-    color: #fff;
-}
-
-.pagination .previous:disabled, .pagination .next:disabled {
-    background-color: #e2e2e2;
-    color: #b5b5b5;
-    cursor: not-allowed;
-}
-
-/* Adding this part to change the default text color to black */
-.pagination .pagination-message {
-    color: #000 !important; /* Ensures the default message is black */
-}
-
-/* Ensure the "Showing X to Y of Z results" text is black */
-.pagination-info {
-    color: #000 !important; /* Set text color to black */
-}
-
-.pagination-info span {
-    color: #000 !important; /* Set pagination numbers color to black */
-}
+.pagination .active a { color: #fff !important; background-color: #6c94b8; }
+.pagination a:hover { background-color: #6c94b8; color: #fff; }
+.pagination .disabled { background-color: #e2e2e2; color: #b5b5b5; cursor: not-allowed; }
 
 /* ==========================================
-   Additional General Styles
+   Tooltip
 ========================================== */
-.text-gray-700 {
-    color: #4a5568;
-}
-
-.bg-lightblue-300 {
-    background-color: #6c94b8;
-}
-
-/* Custom tooltip for better UX on hover actions */
-.tooltip {
-    position: relative;
-    display: inline-block;
-}
-
+.tooltip { position: relative; display: inline-block; }
 .tooltip .tooltiptext {
     visibility: hidden;
     width: 120px;
@@ -426,10 +206,40 @@ body {
     opacity: 0;
     transition: opacity 0.3s;
 }
+.tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
 
-.tooltip:hover .tooltiptext {
-    visibility: visible;
-    opacity: 1;
+/* ==========================================
+   Gantt Chart Specific
+========================================== */
+.gantt-container { margin-top: 1rem; }
+
+/* Tabs for Gantt */
+.gantt-tabs { display: flex; border-bottom: 2px solid #cbd5e1; gap: 8px; }
+.gantt-tabs a {
+    padding: 8px 16px;
+    border-radius: 6px 6px 0 0;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    background-color: #fff;
+    color: #6b7280;
+    border: 1px solid #cbd5e1;
+}
+.gantt-tabs a.active-tab {
+    background-color: #eff6ff;
+    color: #1d4ed8;
+    border-color: #1d4ed8;
 }
 
+/* Frappe Gantt Bar Colors */
+.bar-completed { fill: #22c55e !important; }    /* green */
+.bar-in-progress { fill: #3b82f6 !important; }  /* blue */
+.bar-delayed { fill: #ef4444 !important; }      /* red */
 
+/* ==========================================
+   Utility Classes
+========================================== */
+.text-red-600 { color: #ef4444; }
+.text-gray-700 { color: #4a5568; }
+.font-bold { font-weight: 700; }
+.hidden { display: none; }

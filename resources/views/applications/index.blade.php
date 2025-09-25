@@ -19,7 +19,8 @@
         <option value="">All Applications</option>
         <option value="New Application" {{ request('type') == 'New Application' ? 'selected' : '' }}>New Application</option>
         <option value="Renewal Application" {{ request('type') == 'Renewal Application' ? 'selected' : '' }}>Renewal Application</option>
-        <option value="Downgrade/Cancellation" {{ request('type') == 'Downgrade/Cancellation' ? 'selected' : '' }}>Downgrade/Cancellation</option>
+        <option value="Cancellation and Downgrading" {{ request('type') == 'Cancellation and Downgrading' ? 'selected' : '' }}>Cancellation and Downgrading</option>
+
     </select>
 
     <!-- Factory Filter -->

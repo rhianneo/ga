@@ -6,6 +6,7 @@ use App\Models\Application;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
+
 class ApplicationController extends Controller
 {
     /**
@@ -44,7 +45,8 @@ class ApplicationController extends Controller
         }
 
         // Paginate the results with 10 applications per page
-        $applications = $applications->paginate(10);
+        $applications = $applications->paginate(20);
+
 
         // Return the view with filtered applications, available years, and pagination
         return view('applications.index', compact('applications', 'years'));

@@ -65,8 +65,9 @@ class Application extends Model
      */
     public function getDaysBeforeExpiryAttribute()
     {
-        return Carbon::now()->diffInDays($this->expiry_date, false);
+        return Carbon::today()->diffInDays($this->expiry_date->startOfDay(), false);
     }
+
     
 
     /**
