@@ -88,6 +88,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     */
     Route::middleware(['auth', 'verified', 'role:GA Staff,Admin Expatriate,Expatriate'])->group(function () {
         Route::get('/gantt', [GanttController::class, 'index'])->name('gantt.index');
+        
     });
 
 

@@ -27,9 +27,6 @@ class AuthenticatedSessionController extends Controller
      * @param \App\Http\Requests\Auth\LoginRequest $request
      * @return \Illuminate\Http\RedirectResponse
      */
-
-
-
     public function store(LoginRequest $request): RedirectResponse
     {
         // Authenticate the user based on the provided credentials
@@ -40,21 +37,23 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
-        \Log::info("User logged in", ['user' => $user]);  // Log the user data
+        // Log user data after authentication
+        \Log::info("User logged in", ['user' => $user]);
 
         // Redirect based on the user's role
         switch ($user->role) {
             case 'GA Staff':
                 return redirect()->route('dashboard');  // Redirect GA Staff to dashboard
             case 'Admin Expatriate':
+                return redirect()->route('gantt.index');  // Redirect Admin Expatriate to Gantt chart
             case 'Expatriate':
-                return redirect()->route('gantt');  // Redirect Admin Expatriates and Expatriates to Gantt chart
+                return redirect()->route('gantt.index');  // Redirect Expatriate to their own Gantt chart
             default:
+                // Log a warning if the user's role is unrecognized
                 \Log::warning("Unrecognized role for user: " . $user->role);
                 return redirect()->route('home');  // Redirect to 'home' if the role is unrecognized
         }
     }
-
 
     /**
      * Log the user out and invalidate the session.

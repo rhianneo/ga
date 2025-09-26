@@ -18,9 +18,9 @@
 
                     @elseif($user->isAdminExpatriate())
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Dashboard</x-nav-link>
-                        <x-nav-link :href="route('gantt')" :active="request()->routeIs('gantt')">Gantt Chart</x-nav-link>
+                        <x-nav-link :href="route('gantt.index')" :active="request()->routeIs('gantt.index')">Gantt Chart</x-nav-link>
                     @elseif($user->isExpatriate())
-                        <x-nav-link :href="route('gantt')" :active="request()->routeIs('gantt')">Gantt Chart</x-nav-link>
+                        <x-nav-link :href="route('gantt.index')" :active="request()->routeIs('gantt.index')">Gantt Chart</x-nav-link>
                     @endif
                 </div>
             </div>
