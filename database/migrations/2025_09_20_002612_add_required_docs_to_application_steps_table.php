@@ -25,8 +25,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        /*
         Schema::table('application_steps', function (Blueprint $table) {
             $table->dropColumn('required_docs');
         });
+        */
     }
 };

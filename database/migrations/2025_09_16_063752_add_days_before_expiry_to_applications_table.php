@@ -26,9 +26,11 @@ class AddDaysBeforeExpiryToApplicationsTable extends Migration
      */
     public function down(): void
     {
+        /*
         Schema::table('applications', function (Blueprint $table) {
             // Drop the 'days_before_expiry' column if the migration is rolled back
             $table->dropColumn('days_before_expiry');
         });
+        */
     }
 }

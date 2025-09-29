@@ -46,8 +46,10 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('actual_progress', function (Blueprint $table) {
+     
+     /*   Schema::table('actual_progress', function (Blueprint $table) {
             // You can optionally re-add old columns if you rollback
         });
+    */
     }
 };

@@ -18,11 +18,13 @@ return new class extends Migration
 
     public function down(): void
     {
+        /*
         Schema::table('applications', function (Blueprint $table) {
             // Revert 'application_type' back to 'type' in case of rollback
             if (Schema::hasColumn('applications', 'application_type')) {
                 $table->renameColumn('application_type', 'type');
             }
         });
+        */
     }
 };

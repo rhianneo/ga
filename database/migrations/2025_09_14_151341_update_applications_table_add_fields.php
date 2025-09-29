@@ -22,11 +22,13 @@ return new class extends Migration
 
     public function down(): void
     {
+        /*
         Schema::table('applications', function (Blueprint $table) {
             // Revert 'progress' back to 'status' in case of rollback
             if (Schema::hasColumn('applications', 'progress')) {
                 $table->renameColumn('progress', 'status');
             }
         });
+        */ 
     }
 };

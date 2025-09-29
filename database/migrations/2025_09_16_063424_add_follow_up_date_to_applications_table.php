@@ -26,9 +26,12 @@ class AddFollowUpDateToApplicationsTable extends Migration
      */
     public function down(): void
     {
+        /*
         Schema::table('applications', function (Blueprint $table) {
             // Drop the 'follow_up_date' column if the migration is rolled back
             $table->dropColumn('follow_up_date');
         });
+        */
+    
     }
 }

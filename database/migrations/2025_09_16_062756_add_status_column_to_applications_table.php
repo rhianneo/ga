@@ -21,10 +21,12 @@ return new class extends Migration
 
     public function down(): void
     {
+        /*
         Schema::table('applications', function (Blueprint $table) {
             // Drop the 'status' column
             $table->dropColumn('status');
         });
+        */
     }
 
 };

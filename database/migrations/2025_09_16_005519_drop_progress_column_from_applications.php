@@ -16,9 +16,11 @@ class DropProgressColumnFromApplications extends Migration
 
     public function down(): void
     {
+        /*
         // If we ever rollback, we can re-add the 'progress' column
         Schema::table('applications', function (Blueprint $table) {
             $table->string('progress')->default('Not Started')->after('days_before_expiry');
         });
+        */
     }
 }

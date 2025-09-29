@@ -31,6 +31,7 @@ return new class extends Migration
 
     public function down(): void
     {
+        /*
         Schema::table('actual_progress', function (Blueprint $table) {
             $table->dropColumn([
                 'visa_extension_start','visa_extension_end','visa_extension_duration',
@@ -39,5 +40,6 @@ return new class extends Migration
                 'cancellation_start','cancellation_end','cancellation_duration'
             ]);
         });
+        */
     }
 };

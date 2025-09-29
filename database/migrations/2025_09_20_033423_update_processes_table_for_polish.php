@@ -23,13 +23,16 @@ return new class extends Migration
         });
     }
 
-    public function down(): void
+   public function down(): void
     {
-        Schema::table('processes', function (Blueprint $table) {
-            $table->string('sub_process')->nullable()->change();
-            $table->integer('order')->default(0)->change();
-            $table->integer('duration_days')->nullable()->change();
-            $table->dropIndex(['application_type', 'major_process']);
-        });
+        // Schema::table('processes', function (Blueprint $table) {
+        //     // Revert column modifications
+        //     $table->string('sub_process')->nullable()->change();
+        //     $table->integer('order')->default(0)->change();
+        //     $table->integer('duration_days')->nullable()->change();
+        //     // Remove the index if it exists
+        //     $table->dropIndex(['application_type', 'major_process']);
+        // });
     }
+
 };

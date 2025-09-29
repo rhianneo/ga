@@ -56,35 +56,36 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('actual_progress', function (Blueprint $table) {
-            // Only drop if they exist
-            foreach ([
-                'visa_extension_start', 'visa_extension_end',
-                'cancellation_start', 'cancellation_end',
-                'downgrading_start', 'downgrading_end'
-            ] as $column) {
-                if (Schema::hasColumn('actual_progress', $column)) {
-                    $table->dropColumn($column);
-                }
-            }
+        // Schema::table('actual_progress', function (Blueprint $table) {
+        //     // Only drop if they exist
+        //     foreach ([
+        //         'visa_extension_start', 'visa_extension_end',
+        //         'cancellation_start', 'cancellation_end',
+        //         'downgrading_start', 'downgrading_end'
+        //     ] as $column) {
+        //         if (Schema::hasColumn('actual_progress', $column)) {
+        //             $table->dropColumn($column);
+        //         }
+        //     }
 
-            for ($i = 1; $i <= 10; $i++) {
-                if (Schema::hasColumn('actual_progress', "aep_start_$i")) {
-                    $table->dropColumn("aep_start_$i");
-                }
-                if (Schema::hasColumn('actual_progress', "aep_end_$i")) {
-                    $table->dropColumn("aep_end_$i");
-                }
-            }
+        //     for ($i = 1; $i <= 10; $i++) {
+        //         if (Schema::hasColumn('actual_progress', "aep_start_$i")) {
+        //             $table->dropColumn("aep_start_$i");
+        //         }
+        //         if (Schema::hasColumn('actual_progress', "aep_end_$i")) {
+        //             $table->dropColumn("aep_end_$i");
+        //         }
+        //     }
 
-            for ($i = 1; $i <= 8; $i++) {
-                if (Schema::hasColumn('actual_progress', "pv_start_$i")) {
-                    $table->dropColumn("pv_start_$i");
-                }
-                if (Schema::hasColumn('actual_progress', "pv_end_$i")) {
-                    $table->dropColumn("pv_end_$i");
-                }
-            }
-        });
+        //     for ($i = 1; $i <= 8; $i++) {
+        //         if (Schema::hasColumn('actual_progress', "pv_start_$i")) {
+        //             $table->dropColumn("pv_start_$i");
+        //         }
+        //         if (Schema::hasColumn('actual_progress', "pv_end_$i")) {
+        //             $table->dropColumn("pv_end_$i");
+        //         }
+        //     }
+        // });
     }
+
 };
