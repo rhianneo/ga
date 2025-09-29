@@ -1,38 +1,38 @@
-{{-- resources/views/actual/edit.blade.php --}}
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto mt-8 max-w-5xl">
+<div class="container mx-auto mt-7 max-w-7xl">
 
-    {{-- Success Message --}}
+    {{-- ✅ Success Message --}}
     @if(session('success'))
         <div class="bg-green-100 border border-green-300 text-green-800 px-4 py-2 rounded mb-4 text-sm">
             {{ session('success') }}
         </div>
     @endif
 
-    <div class="bg-white shadow-md rounded-lg p-6 border border-gray-200">
+    <div class="bg-white rounded-lg shadow p-5">
 
-        {{-- Application Info Accordion --}}
-        <div x-data="{ open: true }" class="mb-8">
+        {{-- 📌 Application Info Accordion --}}
+        <div x-data="{ open: true }" class="mb-6">
             <button 
                 @click="open = !open" 
-                class="w-full flex justify-between items-center bg-gray-50 px-4 py-3 rounded-lg shadow-sm hover:bg-gray-100 transition">
+                class="w-full flex justify-between items-center bg-gray-50 px-4 py-3 rounded-lg hover:bg-gray-100 transition">
+                
                 <div class="flex flex-col text-left">
                     <span class="text-lg font-bold text-gray-900">Application Info</span>
-                    <span class="text-base text-gray-600">Record and track the actual progress</span>
+                    <span class="text-sm text-gray-600">Record and track the actual progress</span>
                 </div>
 
-                <svg :class="{'rotate-180': open}" class="w-6 h-6 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg :class="{ 'rotate-180': open }" class="w-5 h-5 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
             </button>
-            <div x-show="open" x-transition 
-                class="mt-3 bg-white border rounded-lg shadow-sm p-4 text-sm grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 leading-relaxed">
-                <p><span class="font-semibold">Name:</span> <span class="text-gray-800">{{ $application->name }}</span></p>
-                <p><span class="font-semibold">Application Type:</span> <span class="text-gray-800">{{ $application->application_type }}</span></p>
-                <p><span class="font-semibold">Position:</span> <span class="text-gray-800">{{ $application->position }}</span></p>
-                <p><span class="font-semibold">Expiry Date:</span> <span class="text-gray-800">{{ $application->expiry_date?->format('Y-m-d') }}</span></p>
+
+            <div x-show="open" x-transition class="mt-2 p-3 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-sm leading-relaxed">
+                <p><span class="font-semibold">Name:</span> {{ $application->name }}</p>
+                <p><span class="font-semibold">Application Type:</span> {{ $application->application_type }}</p>
+                <p><span class="font-semibold">Position:</span> {{ $application->position }}</p>
+                <p><span class="font-semibold">Expiry Date:</span> {{ $application->expiry_date?->format('Y-m-d') }}</p>
                 <p>
                     <span class="font-semibold">Days Before Expiry:</span>
                     <span class="{{ $application->days_before_expiry <= 60 ? 'text-red-600 font-bold' : 'text-gray-800' }}">
@@ -42,21 +42,21 @@
             </div>
         </div>
 
-        {{-- Subprocesses Table --}}
+        {{-- 📌 Subprocesses Form --}}
         <form action="{{ route('actual.update', $application->id) }}" method="POST">
             @csrf
             @method('PUT')
 
-            <div class="overflow-x-auto max-h-[500px] border rounded-lg shadow-sm">
+            <div class="overflow-x-auto max-h-[600px] border rounded">
                 <table class="min-w-full text-sm border-collapse">
-                    <thead class="bg-gray-100 text-gray-700 sticky top-0 z-10 shadow-sm">
+                    <thead class="bg-gray-100 text-gray-700 sticky top-0 z-10">
                         <tr class="text-center">
-                            <th class="py-2 px-3 border-b">Major Process</th>
-                            <th class="py-2 px-3 border-b">Subprocess</th>
-                            <th class="py-2 px-3 border-b">Duration (Days)</th>
-                            <th class="py-2 px-3 border-b">Actual Start Date</th>
-                            <th class="py-2 px-3 border-b">Actual End Date</th>
-                            <th class="py-2 px-3 border-b">Actual Duration (Days)</th>
+                            <th class="py-2 px-3 border">Major Process</th>
+                            <th class="py-2 px-3 border">Subprocess</th>
+                            <th class="py-2 px-3 border">Duration (Days)</th>
+                            <th class="py-2 px-3 border">Actual Start Date</th>
+                            <th class="py-2 px-3 border">Actual End Date</th>
+                            <th class="py-2 px-3 border">Actual Duration (Days)</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
@@ -64,45 +64,53 @@
 
                         @foreach($processes as $process)
                             @php
-                                $existing = $actualDates->has($process->id) ? $actualDates[$process->id] : null;
+                                $existing = $actualDates->get($process->id);
+                                $isExempt = in_array($application->position, ['President & CEO', 'Vice President & COO']) 
+                                            && $process->sub_process === 'Job Vacancy Proof/Published (PESO, Sunstar, & PhilJobNet)';
                             @endphp
 
                             <tr class="text-center even:bg-gray-50 hover:bg-gray-100 transition">
-                                {{-- Show major process only when it changes --}}
-                                <td class="py-2 px-3 border-b font-semibold text-left align-top">
+                                {{-- ✅ Show Major Process only when it changes --}}
+                                <td class="py-2 px-3 text-left font-semibold align-top border">
                                     @if($currentMajor !== $process->major_process)
                                         {{ $process->major_process }}
                                         @php $currentMajor = $process->major_process; @endphp
                                     @endif
                                 </td>
 
-                                <td class="py-2 px-3 border-b text-left">{{ $process->sub_process }}</td>
-                                <td class="py-2 px-3 border-b">{{ $process->duration_days }}</td>
+                                <td class="py-2 px-3 text-left border">{{ $process->sub_process }}</td>
+                                <td class="py-2 px-3 border">{{ $process->duration_days }}</td>
 
-                                <td class="py-2 px-3 border-b">
-                                    <input type="date" 
-                                           name="start_date[{{ $process->id }}]" 
-                                           value="{{ optional($existing)->start_date?->format('Y-m-d') ?? '' }}" 
-                                           class="w-full border border-gray-300 rounded px-2 py-1 start-date text-sm focus:ring focus:ring-blue-200">
-                                </td>
-
-                                <td class="py-2 px-3 border-b">
-                                    <input type="date" 
-                                           name="end_date[{{ $process->id }}]" 
-                                           value="{{ optional($existing)->end_date?->format('Y-m-d') ?? '' }}" 
-                                           class="w-full border border-gray-300 rounded px-2 py-1 end-date text-sm focus:ring focus:ring-blue-200">
-                                </td>
-
-                                <td class="py-2 px-3 border-b actual-duration text-center font-medium text-gray-700">
-                                    {{ intval(optional($existing)->actual_duration ?? 0) }}
-                                </td>
+                                @if($isExempt)
+                                    {{-- 🚫 Exempted Subprocess --}}
+                                    <td colspan="3" class="py-2 px-3 italic text-gray-500 text-center border">
+                                        Exempted from this process due to position.
+                                    </td>
+                                @else
+                                    {{-- ✅ Editable Inputs --}}
+                                    <td class="py-2 px-3 border">
+                                        <input type="date" 
+                                            name="start_date[{{ $process->id }}]" 
+                                            value="{{ optional($existing)->start_date?->format('Y-m-d') ?? '' }}" 
+                                            class="w-full rounded px-2 py-1 text-sm start-date focus:ring focus:ring-blue-200">
+                                    </td>
+                                    <td class="py-2 px-3 border">
+                                        <input type="date" 
+                                            name="end_date[{{ $process->id }}]" 
+                                            value="{{ optional($existing)->end_date?->format('Y-m-d') ?? '' }}" 
+                                            class="w-full rounded px-2 py-1 text-sm end-date focus:ring focus:ring-blue-200">
+                                    </td>
+                                    <td class="py-2 px-3 text-center font-medium text-gray-700 border actual-duration">
+                                        {{ intval(optional($existing)->actual_duration ?? 0) }}
+                                    </td>
+                                @endif
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
 
-            {{-- Action Buttons --}}
+             {{-- Action Buttons --}}
             <div class="flex justify-end mt-6 space-x-4">
                 {{-- Cancel Button --}}
                 <a href="{{ route('actual.index') }}" 
@@ -116,14 +124,13 @@
                     Update
                 </button>
             </div>
-
         </form>
     </div>
 </div>
 
-{{-- JS to calculate actual duration excluding weekends --}}
+{{-- 📌 Script: Auto-calculate actual duration excluding weekends --}}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
     function calculateBusinessDays(start, end) {
         if (!start || !end) return 0;
         let count = 0;
@@ -137,23 +144,24 @@ document.addEventListener('DOMContentLoaded', function() {
         return count;
     }
 
-    const startInputs = document.querySelectorAll('.start-date');
-    const endInputs = document.querySelectorAll('.end-date');
     const rows = document.querySelectorAll('tbody tr');
 
     function updateDurations() {
         rows.forEach((row, idx) => {
-            const start = startInputs[idx].value;
-            const end = endInputs[idx].value;
+            const startInput = row.querySelector('.start-date');
+            const endInput = row.querySelector('.end-date');
             const durationCell = row.querySelector('.actual-duration');
-            durationCell.textContent = calculateBusinessDays(start, end);
+            if (startInput && endInput && durationCell) {
+                durationCell.textContent = calculateBusinessDays(startInput.value, endInput.value);
+            }
         });
     }
 
-    startInputs.forEach(input => input.addEventListener('change', updateDurations));
-    endInputs.forEach(input => input.addEventListener('change', updateDurations));
+    document.querySelectorAll('.start-date, .end-date').forEach(input => {
+        input.addEventListener('change', updateDurations);
+    });
 
-    updateDurations(); // initial calculation
+    updateDurations(); // initial run
 });
 </script>
 @endsection

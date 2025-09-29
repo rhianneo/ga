@@ -53,10 +53,12 @@ class ResetPassword extends Notification
             'token' => $this->token,
             'email' => $notifiable->getEmailForPasswordReset(),
         ], false));
-
+        
         return (new MailMessage)
-            ->subject('Reset Your Password')
-            ->view('emails.reset-password', ['url' => $url]); // use custom email template
+        ->subject('Reset Your Password')
+        ->view('emails.reset-password', ['url' => $url])
+        ->line('If the button does not work, copy this URL: ' . $url);
+
     }
 
     /**
