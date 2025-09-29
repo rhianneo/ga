@@ -70,7 +70,6 @@
 <body>
 <div class="email-container">
     <!-- Embedded Toyoflex Logo -->
-    <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('images/toyoflex.png'))) }}" alt="Toyoflex Logo" class="logo">
 
     <h1>Hello!</h1>
 
