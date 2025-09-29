@@ -84,9 +84,10 @@
                     <td class="py-2 px-4">{{ $app->position }}</td>
                     <td class="py-2 px-4">{{ $app->AEP_number ?? '-' }}</td>
                     <td class="py-2 px-4">{{ \Carbon\Carbon::parse($app->expiry_date)->format('Y-m-d') }}</td>
-                    <td class="py-2 px-4 {{ abs(intval(\Carbon\Carbon::parse($app->expiry_date)->diffInDays(now()))) < 60 ? 'text-red-500' : '' }}">
-                        {{ abs(intval(\Carbon\Carbon::parse($app->expiry_date)->diffInDays(now()))) }} days
+                    <td class="py-2 px-4 {{ \Carbon\Carbon::today()->diffInDays($app->expiry_date) < 60 ? 'text-red-500' : '' }}">
+                        {{ \Carbon\Carbon::today()->diffInDays($app->expiry_date) }} days
                     </td>
+
                     <td class="py-2 px-4">{{ $app->status }}</td>
                     <!-- Actions Column (Visible only for non-Print views) -->
                     <td class="py-2 px-4 flex justify-center gap-2 print:hidden">

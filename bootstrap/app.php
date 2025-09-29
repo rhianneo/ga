@@ -31,7 +31,7 @@ $builder = LaravelApplication::configure(basePath: dirname(__DIR__))
     // Global middleware (applied to all routes)
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'role' => RoleMiddleware::class, // 'role' alias
+            'role' => RoleMiddleware::class, // 'role' alias for middleware
         ]);
     })
 
@@ -42,45 +42,52 @@ $builder = LaravelApplication::configure(basePath: dirname(__DIR__))
 
 /*
  |------------------------------------------------------------------------
- | Register scheduled tasks only if the builder supports it.
- | This avoids fatal errors on installations where the builder API
- | doesn't include withScheduledTasks().
+ | Register scheduled tasks
  |------------------------------------------------------------------------
+ |
+ | This section defines tasks that should run periodically, like sending
+ | expiry notifications for applications.
+ |
  */
 if (method_exists($builder, 'withScheduledTasks')) {
     $builder = $builder->withScheduledTasks(function (Schedule $schedule): void {
-        // Run daily; change frequency if you want
+        // Schedule daily task to check for applications nearing expiry
         $schedule->call(function () {
-            // Find applications that have expiry_date set
+            // Get applications with expiry dates set
             $applications = Application::whereNotNull('expiry_date')->get();
 
             foreach ($applications as $application) {
-                // Ensure expiry_date is a Carbon instance
                 $expiryDate = $application->expiry_date;
                 $currentDate = now();
-                
-                // Skip if expiry date is in the past
+
+                // Skip applications with expiry dates in the past
                 if ($expiryDate->isPast()) {
                     continue;
                 }
 
+                // Calculate days remaining before expiry
                 $daysBeforeExpiry = $currentDate->diffInDays($expiryDate);
 
-                // Send reminders at 100 and 90 days before expiry
+                // Send reminder if 100 or 90 days before expiry
                 if ($daysBeforeExpiry === 100 || $daysBeforeExpiry === 90) {
+                    // Get all GA Staff users
                     $gaStaff = User::where('role', 'GA Staff')->get();
                     if ($gaStaff->isNotEmpty()) {
+                        // Send notifications to GA Staff
                         Notification::send($gaStaff, new ExpiryReminder($application, (string) $daysBeforeExpiry));
                     }
                 }
             }
-        })->daily();
+        })->daily();  // Run this task daily
     });
 }
 
 /*
  |------------------------------------------------------------------------
- | Finally create the application instance and return it
+ | Finally, create the application instance and return it
  |------------------------------------------------------------------------
+ |
+ | Create the application instance that is configured and return it.
+ |
  */
 return $builder->create();

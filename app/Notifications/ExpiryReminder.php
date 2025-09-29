@@ -35,7 +35,7 @@ class ExpiryReminder extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail'];  // Notification will be sent via email only
     }
 
     /**
@@ -46,16 +46,20 @@ class ExpiryReminder extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
+        // Format the expiry date
         $expiryDate = $this->application->expiry_date->format('M d, Y');
+
+        // Set the reminder message based on reminder type (90 or 100 days)
         $reminderMessage = $this->reminderType == '90'
             ? 'This is a reminder that the application expiry date is 90 days away.'
             : 'This is a reminder that the application expiry date is 100 days away.';
 
+        // Compose the mail message
         return (new MailMessage)
                     ->greeting('Hello GA Staff,')
                     ->line('The application for ' . $this->application->full_name . ' (Position: ' . $this->application->position . ') is approaching expiry on ' . $expiryDate . '.')
                     ->line($reminderMessage)
-                    ->action('View Application', url('/applications/' . $this->application->id))
+                    ->action('View Application', url('/applications/' . $this->application->id))  // Link to the application details
                     ->line('Please take the necessary action to process this application before the expiry date.')
                     ->line('Thank you for your attention.');
     }
