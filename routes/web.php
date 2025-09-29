@@ -11,19 +11,23 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\EmailVerificationPromptController;
+use App\Http\Controllers\Auth\EmailVerificationNotificationController;
+use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Auth\ConfirmablePasswordController;
 
 /*
-|--------------------------------------------------------------------------
-| Public Routes
-|--------------------------------------------------------------------------
+|---------------------------------------------------------------------------|
+| Public Routes                                                             |
+|---------------------------------------------------------------------------|
 */
 Route::get('/', fn() => view('welcome'));
 Route::get('/check-role', fn() => 'Current User Role: ' . (auth()->user()?->role ?? 'Guest'));
 
 /*
-|--------------------------------------------------------------------------
-| Authentication Routes
-|--------------------------------------------------------------------------
+|---------------------------------------------------------------------------|
+| Authentication Routes                                                     |
+|---------------------------------------------------------------------------|
 */
 Route::prefix('auth')->group(function () {
 
@@ -41,36 +45,43 @@ Route::prefix('auth')->group(function () {
     Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
     Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
     Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.update');
+
+    // Email Verification
+    Route::get('/email/verify', [EmailVerificationPromptController::class, '__invoke'])
+        ->middleware('auth')
+        ->name('verification.notice');
+    Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke'])
+        ->middleware(['auth', 'signed'])
+        ->name('verification.verify');
+    Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
+        ->middleware(['auth', 'throttle:6,1'])
+        ->name('verification.send');
+
+    // Confirm Password
+    Route::get('/confirm-password', [ConfirmablePasswordController::class, 'show'])->name('password.confirm');
+    Route::post('/confirm-password', [ConfirmablePasswordController::class, 'store']);
 });
 
 /*
-|--------------------------------------------------------------------------
-| Authenticated Routes (All Roles)
-|--------------------------------------------------------------------------
+|---------------------------------------------------------------------------|
+| Authenticated Routes (Role-based)                                          |
+|---------------------------------------------------------------------------|
 */
 Route::middleware(['auth', 'verified'])->group(function () {
 
     /*
-    |--------------------------------------------------------------------------
-    | GA Staff Dashboard & CRUD
-    |--------------------------------------------------------------------------
+    |---------------------------------------------------------------------------|
+    | GA Staff Dashboard & CRUD                                                  |
+    |---------------------------------------------------------------------------|
     */
     Route::middleware('role:GA Staff')->group(function () {
-
-        // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-        // Application Management (CRUD)
         Route::resource('applications', ApplicationController::class);
-
-        // Actual Progress Entry (CRUD)
         Route::prefix('actual-entry')->name('actual.')->group(function () {
-            Route::get('/', [ActualProgressController::class, 'index'])->name('index'); // /actual-entry
-            Route::get('/{id}/edit', [ActualProgressController::class, 'edit'])->name('edit'); // /actual-entry/{id}/edit
-            Route::put('/{id}', [ActualProgressController::class, 'update'])->name('update'); // /actual-entry/{id}
+            Route::get('/', [ActualProgressController::class, 'index'])->name('index');
+            Route::get('/{id}/edit', [ActualProgressController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [ActualProgressController::class, 'update'])->name('update');
         });
-
-        // Process Management (CRUD)
         Route::prefix('process-management')->name('process.')->group(function () {
             Route::get('/', [ProcessManagementController::class, 'index'])->name('index');
             Route::get('/create', [ProcessManagementController::class, 'create'])->name('create');
@@ -82,22 +93,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     /*
-    |--------------------------------------------------------------------------
-    | Gantt Chart (Read-Only for GA Staff, Admin Expatriate, Expatriate)
-    |--------------------------------------------------------------------------
+    |---------------------------------------------------------------------------|
+    | Gantt Chart (Read-Only for GA Staff, Admin Expatriate, Expatriate)        |
+    |---------------------------------------------------------------------------|
     */
     Route::middleware(['auth', 'verified', 'role:GA Staff,Admin Expatriate,Expatriate'])->group(function () {
         Route::get('/gantt', [GanttController::class, 'index'])->name('gantt.index');
-        
     });
 
-
-    
-    
     /*
-    |--------------------------------------------------------------------------
-    | Profile Management
-    |--------------------------------------------------------------------------
+    |---------------------------------------------------------------------------|
+    | Profile Management                                                         |
+    |---------------------------------------------------------------------------|
     */
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [ProfileController::class, 'edit'])->name('edit');
