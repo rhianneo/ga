@@ -74,10 +74,9 @@
                     @endforeach
                 </div>
 
-                {{-- Exemption Note --}}
                 @if(in_array($application->position, ['President & CEO', 'Vice President & COO']))
                     <p class="mt-2 text-xs italic text-gray-500">
-                        <span class="font-semibold"> This applicant is exempted from the process: Job Vacancy Proof/Published (PESO, Sunstar, & PhilJobNet).</span>
+                        <span class="font-semibold">This applicant is exempted from: Job Vacancy Proof/Published (PESO, Sunstar, & PhilJobNet).</span>
                     </p>
                 @endif
             </div>
@@ -93,107 +92,80 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/frappe-gantt/dist/frappe-gantt.css">
 
 @push('styles')
-    <style>
-        /* Tabs */
-        .active-tab {
-            background-color: #e0f7fa;
-            color: #0288d1;
-            border-color: #0288d1;
-        }
-        .inactive-tab {
-            background-color: #fff;
-            color: #607d8b;
-        }
+<style>
+    /* Tabs */
+    .active-tab { background-color: #e0f7fa; color: #0288d1; border-color: #0288d1; }
+    .inactive-tab { background-color: #fff; color: #607d8b; }
 
-        /* Gantt Bar Colors (match legend) */
-        .bar-wrapper.bg-blue-500 rect.bar,
-        .bar-wrapper.bg-blue-500 rect.bar-progress { fill: #59ddd2ff !important; }
-        .bar-wrapper.bg-green-500 rect.bar,
-        .bar-wrapper.bg-green-500 rect.bar-progress { fill: #8bc34a !important; }
-        .bar-wrapper.bg-yellow-500 rect.bar,
-        .bar-wrapper.bg-yellow-500 rect.bar-progress { fill: #ffeb3b !important; }
-        .bar-wrapper.bg-red-500 rect.bar,
-        .bar-wrapper.bg-red-500 rect.bar-progress { fill: #f44336 !important; }
-        .bar-wrapper.bg-purple-500 rect.bar,
-        .bar-wrapper.bg-purple-500 rect.bar-progress { fill: #9c27b0 !important; }
+    /* Minimum bar width for 1-day tasks */
+    .bar-wrapper rect.bar { min-width: 8px !important; }
+    .bar-wrapper rect.bar-progress { min-width: 8px !important; }
 
-        /* Default gray */
-        .bar-wrapper:not([class*="bg-"]) rect.bar,
-        .bar-wrapper:not([class*="bg-"]) rect.bar-progress { fill: #9e9e9e !important; }
+    /* Bar Colors */
+    .bar-wrapper.bg-blue-500 rect.bar, .bar-wrapper.bg-blue-500 rect.bar-progress { fill: #59ddd2ff !important; }
+    .bar-wrapper.bg-green-500 rect.bar, .bar-wrapper.bg-green-500 rect.bar-progress { fill: #8bc34a !important; }
+    .bar-wrapper.bg-yellow-500 rect.bar, .bar-wrapper.bg-yellow-500 rect.bar-progress { fill: #ffeb3b !important; }
+    .bar-wrapper.bg-red-500 rect.bar, .bar-wrapper.bg-red-500 rect.bar-progress { fill: #f44336 !important; }
+    .bar-wrapper.bg-purple-500 rect.bar, .bar-wrapper.bg-purple-500 rect.bar-progress { fill: #9c27b0 !important; }
+    .bar-wrapper:not([class*="bg-"]) rect.bar, .bar-wrapper:not([class*="bg-"]) rect.bar-progress { fill: #9e9e9e !important; }
 
-        /* Popup */
-        .gantt-popup {
-            background-color: #fff;
-            border: 1px solid #ddd;
-            padding: 12px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .gantt-popup h5 {
-            margin-bottom: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #0288d1;
-        }
-        .gantt-popup p {
-            margin: 0;
-            font-size: 12px;
-            color: #555;
-        }
-    </style>
+    /* Popup */
+    .gantt-popup { background-color: #fff; border: 1px solid #ddd; padding: 12px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .gantt-popup h5 { margin-bottom: 10px; font-size: 14px; font-weight: 600; color: #0288d1; }
+    .gantt-popup p { margin: 0; font-size: 12px; color: #555; }
+</style>
 @endpush
 
 @push('scripts')
 <script>
-    const ganttData = @json($ganttData);
+const ganttData = @json($ganttData);
 
-    function initGantt(appId, data) {
-        const element = document.getElementById('gantt_chart_' + appId);
-        if (!element) return;
+function initGantt(appId, data) {
+    const element = document.getElementById('gantt_chart_' + appId);
+    if (!element) return;
 
-        element.innerHTML = "";
+    element.innerHTML = "";
 
-        // Filter out exempt subprocess
-        const filteredTasks = data.tasks.filter(task => 
-            task.name !== "Job Vacancy Proof/Published (PESO, Sunstar, & PhilJobNet)"
-        );
+    const filteredTasks = data.tasks.filter(task => 
+        task.name !== "Job Vacancy Proof/Published (PESO, Sunstar, & PhilJobNet)"
+    );
 
-        new Gantt("#" + element.id, filteredTasks, {
-            view_mode: 'Day',
-            date_format: 'YYYY-MM-DD',
-            task_class: (task) => task.custom_class,
-            custom_popup_html: function(task) {
-                return `
-                    <div class="gantt-popup">
-                        <h5>${task.name}</h5>
-                        <p>Start: ${task.start}</p>
-                        <p>End: ${task.end}</p>
-                        <p>Progress: ${task.progress}%</p>
-                    </div>
-                `;
-            }
-        });
-    }
-
-    function showTab(appId, event) {
-        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-        document.getElementById('tab-' + appId).classList.remove('hidden');
-
-        document.querySelectorAll('#ganttTabs a').forEach(tab => {
-            tab.classList.remove('active-tab');
-            tab.classList.add('inactive-tab');
-        });
-
-        event.currentTarget.classList.remove('inactive-tab');
-        event.currentTarget.classList.add('active-tab');
-
-        initGantt(appId, ganttData[appId]);
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-        const firstAppId = Object.keys(ganttData)[0];
-        if (firstAppId) initGantt(firstAppId, ganttData[firstAppId]);
+    new Gantt("#" + element.id, filteredTasks, {
+        view_mode: 'Day',
+        date_format: 'YYYY-MM-DD',
+        task_class: (task) => task.custom_class,
+        custom_popup_html: function(task) {
+            return `
+                <div class="gantt-popup">
+                    <h5>${task.name}</h5>
+                    <p>Start: ${task.start}</p>
+                    <p>End: ${task.end}</p>
+                    <p>Progress: ${task.progress}%</p>
+                </div>
+            `;
+        }
     });
+}
+
+function showTab(appId, event) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+    document.getElementById('tab-' + appId).classList.remove('hidden');
+
+    document.querySelectorAll('#ganttTabs a').forEach(tab => {
+        tab.classList.remove('active-tab');
+        tab.classList.add('inactive-tab');
+    });
+
+    event.currentTarget.classList.remove('inactive-tab');
+    event.currentTarget.classList.add('active-tab');
+
+    initGantt(appId, ganttData[appId]);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const firstAppId = Object.keys(ganttData)[0];
+    if (firstAppId) initGantt(firstAppId, ganttData[firstAppId]);
+});
 </script>
 @endpush
 @endsection

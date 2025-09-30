@@ -59,4 +59,10 @@ class Process extends Model
     {
         return $query->orderBy('order');
     }
+
+     // New hierarchy scope: order by Major Process and order
+    public function scopeHierarchy($query)
+    {
+        return $query->orderBy('major_process')->orderBy('order');
+    }
 }
