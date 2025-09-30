@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use Illuminate\Notifications\Notifiable; // Import this
+
 
 class Application extends Model
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     protected $table = 'applications';
 

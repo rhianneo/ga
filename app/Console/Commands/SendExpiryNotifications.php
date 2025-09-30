@@ -4,47 +4,38 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Application;
+use App\Models\User;
 use App\Notifications\ExpiryReminder;
+use Carbon\Carbon;
 
 class SendExpiryNotifications extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'app:send-expiry-notifications';
+    protected $description = 'Send reminders for applications approaching expiry (100 & 90 days)';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Send email reminders for applications expiring in 90 or 100 days';
-
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
-        // Get applications that are 90 or 100 days from expiry
-        $applications = Application::where('days_before_expiry', 90)
-                                    ->orWhere('days_before_expiry', 100)
-                                    ->get();
+        $today = Carbon::today();
 
-        // Check if any applications were found
-        if ($applications->isEmpty()) {
-            $this->info('No applications found that are expiring in 90 or 100 days.');
-            return;
+        // Get applications that are 100 or 90 days before expiry
+        $applications = Application::whereNotNull('expiry_date')->get();
+
+        foreach ($applications as $app) {
+            $daysBeforeExpiry = $today->diffInDays($app->expiry_date, false); // false = allow negative
+
+            if (in_array($daysBeforeExpiry, [100, 90])) {
+                // Get GA Staff users
+                $gaStaff = User::where('role', 'GA Staff')->get();
+
+                if ($gaStaff->isNotEmpty()) {
+                    foreach ($gaStaff as $staff) {
+                        $staff->notify(new ExpiryReminder($app, $daysBeforeExpiry));
+                    }
+                    $this->info("Reminder sent for {$app->name} ({$daysBeforeExpiry} days before expiry).");
+                }
+            }
         }
 
-        // Loop through applications and send notifications
-        foreach ($applications as $application) {
-            $reminderType = $application->days_before_expiry == 90 ? '90' : '100';
-            $application->notify(new ExpiryReminder($application, $reminderType));
-        }
-
-        // Output info to console
-        $this->info('Expiry notifications sent successfully!');
+        $this->info("Expiry notifications checked successfully.");
     }
 }
