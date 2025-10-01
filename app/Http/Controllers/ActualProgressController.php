@@ -7,88 +7,111 @@ use App\Models\Process;
 use App\Models\ActualDate;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Helpers\LogHelper;
 
 class ActualProgressController extends Controller
 {
+    /**
+     * Display a list of applications in progress.
+     */
     public function index()
     {
         $applications = Application::where('status', 'In Progress')->get();
         return view('actual.index', compact('applications'));
     }
 
+    /**
+     * Show the form for editing actual progress of a specific application.
+     */
     public function edit($id)
     {
         $application = Application::findOrFail($id);
 
-        // Fetch all processes for this application type
-        $processes = Process::where('application_type', $application->application_type)
-                            ->get();
+        $groupedProcesses = Process::where('application_type', $application->application_type)
+            ->orderBy('order')
+            ->get()
+            ->groupBy('major_process');
 
-        // Group by Major Process and sort by order within each group
-        $groupedProcesses = $processes->sortBy('order')->groupBy('major_process');
-
-        // Fetch existing actual dates keyed by process_id
         $actualDates = ActualDate::where('application_id', $application->id)
-                                 ->get()
-                                 ->keyBy('process_id');
+            ->get()
+            ->keyBy('process_id');
 
         return view('actual.edit', compact('application', 'groupedProcesses', 'actualDates'));
     }
 
+    /**
+     * Update the actual progress for submitted subprocesses.
+     */
     public function update(Request $request, $id)
     {
         $application = Application::findOrFail($id);
+        $logs = [];
 
-        $startDates = $request->input('start_date', []);
-        $endDates   = $request->input('end_date', []);
+        foreach ($request->input('start_date', []) as $processId => $newStart) {
+            $newEnd = $request->input('end_date', [])[$processId] ?? null;
 
-        $processIds = array_unique(array_merge(array_keys($startDates), array_keys($endDates)));
+            $record = ActualDate::firstOrNew([
+                'application_id' => $application->id,
+                'process_id'    => $processId,
+            ]);
 
-        foreach ($processIds as $processId) {
-            $start = $startDates[$processId] ?? null;
-            $end   = $endDates[$processId] ?? null;
+            $process = Process::find($processId);
+            $subprocessName = $process?->sub_process ?? "Process {$processId}";
+            $changes = [];
 
-            $record = ActualDate::where('application_id', $application->id)
-                                ->where('process_id', $processId)
-                                ->first();
+            // Normalize dates for comparison
+            $oldStart = $record->start_date ? Carbon::parse($record->start_date)->format('Y-m-d') : null;
+            $oldEnd   = $record->end_date   ? Carbon::parse($record->end_date)->format('Y-m-d') : null;
+            $newStartNorm = $newStart ? Carbon::parse($newStart)->format('Y-m-d') : null;
+            $newEndNorm   = $newEnd   ? Carbon::parse($newEnd)->format('Y-m-d') : null;
 
-            if (!$record) {
-                if (!$start && !$end) continue;
+            // Only update if different
+            if ($newStartNorm !== $oldStart) {
+                $changes[] = "Start: " . ($oldStart ?? 'N/A') . " → " . ($newStartNorm ?? 'N/A');
+                $record->start_date = $newStartNorm;
+            }
 
-                ActualDate::create([
-                    'application_id' => $application->id,
-                    'process_id'     => $processId,
-                    'start_date'     => $start,
-                    'end_date'       => $end,
-                    'actual_duration'=> $this->calculateBusinessDays($start, $end),
-                ]);
-            } else {
-                $updateData = [];
+            if ($newEndNorm !== $oldEnd) {
+                $changes[] = "End: " . ($oldEnd ?? 'N/A') . " → " . ($newEndNorm ?? 'N/A');
+                $record->end_date = $newEndNorm;
+            }
 
-                if (!is_null($start)) $updateData['start_date'] = $start;
-                if (!is_null($end)) $updateData['end_date'] = $end;
+            if (!empty($changes)) {
+                $record->actual_duration = $this->calculateBusinessDays($record->start_date, $record->end_date);
+                $record->save();
 
-                if (!empty($updateData)) {
-                    $s = $updateData['start_date'] ?? $record->start_date;
-                    $e = $updateData['end_date'] ?? $record->end_date;
-                    $updateData['actual_duration'] = $this->calculateBusinessDays($s, $e);
-
-                    $record->update($updateData);
-                }
+                $logs[] = "{$application->name} | {$subprocessName} | " . implode("; ", $changes);
             }
         }
 
-        return redirect()->route('actual.edit', $application->id)
-                         ->with('success', 'Actual progress updated successfully.');
+        foreach ($logs as $log) {
+            LogHelper::logAction('Actual Progress', 'update', $application->id, $log);
+        }
+
+        return redirect()
+            ->route('actual.edit', $application->id)
+            ->with('success', 'Actual progress updated successfully.');
     }
 
-    private function calculateBusinessDays($start, $end)
+
+    /**
+     * Format date for display.
+     */
+    private function formatDate($date): string
+    {
+        return $date ? Carbon::parse($date)->format('M d, Y') : 'N/A';
+    }
+
+    /**
+     * Calculate business days between two dates (excluding weekends).
+     */
+    private function calculateBusinessDays($start, $end): int
     {
         if (!$start || !$end) return 0;
 
         $start = Carbon::parse($start);
         $end   = Carbon::parse($end);
-        $days = 0;
+        $days  = 0;
 
         for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
             if (!$date->isWeekend()) $days++;

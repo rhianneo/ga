@@ -53,6 +53,12 @@
                         {{ __('Application Management') }}
                     </x-nav-link>
 
+                    <x-nav-link :href="route('audit.index')" :active="request()->routeIs('audit.*')" class="nav-item">
+                        {{ __('Audit Logs Chart') }}
+                    </x-nav-link>
+                    
+
+
                 @elseif($user->isAdminExpatriate() || $user->isExpatriate())
                     <x-nav-link :href="route('gantt.index')" :active="request()->routeIs('gantt.*')" class="nav-item">
                         {{ __('Gantt Chart') }}

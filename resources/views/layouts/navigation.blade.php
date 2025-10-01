@@ -15,6 +15,7 @@
                         <x-nav-link :href="route('applications.index')" :active="request()->routeIs('applications.*')">Application Management</x-nav-link>
                         <x-nav-link :href="route('actual.index')" :active="request()->routeIs('actual.*')">Actual Progress Entry</x-nav-link>
                         <x-nav-link :href="route('process.index')" :active="request()->routeIs('process.*')">Process Management</x-nav-link>
+                        <x-nav-link :href="route('audit.index')" :active="request()->routeIs('audit.*')">Audit Logs</x-nav-link>
 
                     @elseif($user->isAdminExpatriate())
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Dashboard</x-nav-link>

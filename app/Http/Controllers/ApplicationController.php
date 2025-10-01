@@ -5,57 +5,46 @@ namespace App\Http\Controllers;
 use App\Models\Application;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-
+use App\Helpers\LogHelper;
 
 class ApplicationController extends Controller
 {
     /**
-     * Display a listing of applications with optional filters.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\View\View
+     * Display a listing of applications with filters.
      */
     public function index(Request $request)
     {
-        // Get distinct years based on expiry_date
         $years = Application::selectRaw('YEAR(expiry_date) as year')
-                            ->distinct()
-                            ->orderBy('year', 'desc')
-                            ->pluck('year');
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
 
-        // Start building the query for fetching applications
-        $applications = Application::orderBy('expiry_date', 'asc');
+        $applications = Application::query()->orderBy('expiry_date', 'asc');
 
-        // Apply filters if they exist in the request
-        if ($request->has('type') && !empty($request->type)) {
+        if ($request->filled('type')) {
             $applications->where('application_type', $request->type);
         }
 
-        if ($request->has('factory') && !empty($request->factory)) {
+        if ($request->filled('factory')) {
             $applications->where('factory', $request->factory);
         }
 
-        if ($request->has('year') && !empty($request->year)) {
-            // Filter by year using expiry_date
+        if ($request->filled('year')) {
             $applications->whereYear('expiry_date', $request->year);
         }
 
-        if ($request->has('progress') && !empty($request->progress)) {
+        if ($request->filled('progress')) {
             $applications->where('status', $request->progress);
         }
 
-        // Paginate the results with 10 applications per page
-        $applications = $applications->paginate(20);
-
-
-        // Return the view with filtered applications, available years, and pagination
-        return view('applications.index', compact('applications', 'years'));
+        return view('applications.index', [
+            'applications' => $applications->paginate(20),
+            'years'        => $years
+        ]);
     }
 
     /**
      * Show the form for creating a new application.
-     *
-     * @return \Illuminate\View\View
      */
     public function create()
     {
@@ -63,56 +52,51 @@ class ApplicationController extends Controller
     }
 
     /**
-     * Store a newly created application in the database.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\RedirectResponse
+     * Store a newly created application.
      */
     public function store(Request $request)
     {
-        // Validate the incoming data
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|string|in:New Application,Renewal Application,Cancellation and Downgrading',
-            'factory' => 'required|string|in:Device Factory,Medical Factory',
-            'position' => 'required|string|max:255',
+        $validated = $request->validate([
+            'name'            => 'required|string|max:255',
+            'type'            => 'required|string|in:New Application,Renewal Application,Cancellation and Downgrading',
+            'factory'         => 'required|string|in:Device Factory,Medical Factory',
+            'position'        => 'required|string|max:255',
             'passport_number' => 'nullable|string|max:255',
-            'TIN' => 'nullable|string|max:255',
-            'AEP_number' => 'nullable|string|max:255',
-            'expiry_date' => 'required|date',
-            'status' => 'required|string|in:Not Started,In Progress,Completed',
+            'TIN'             => 'nullable|string|max:255',
+            'AEP_number'      => 'nullable|string|max:255',
+            'expiry_date'     => 'required|date',
+            'status'          => 'required|string|in:Not Started,In Progress,Completed',
         ]);
 
-        // Calculate Follow-Up Date and Days Before Expiry
-        $expiry_date = Carbon::parse($request->expiry_date);
-        $follow_up_date = $expiry_date->copy()->subDays(92);
-        $days_before_expiry = max(0, Carbon::now()->diffInDays($expiry_date, false));
+        $expiryDate       = Carbon::parse($validated['expiry_date']);
+        $followUpDate     = $expiryDate->copy()->subDays(92);
+        $daysBeforeExpiry = max(0, Carbon::now()->diffInDays($expiryDate, false));
 
-        // Store the new application
-        Application::create([
-            'name' => $request->name,
-            'application_type' => $request->type,
-            'factory' => $request->factory,
-            'position' => $request->position,
-            'passport_number' => $request->passport_number,
-            'TIN' => $request->TIN,
-            'AEP_number' => $request->AEP_number,
-            'expiry_date' => $expiry_date,
-            'follow_up_date' => $follow_up_date,
-            'days_before_expiry' => $days_before_expiry,
-            'status' => $request->status,
-            'user_id' => auth()->id(),
+        $application = Application::create([
+            'name'              => $validated['name'],
+            'application_type'  => $validated['type'],
+            'factory'           => $validated['factory'],
+            'position'          => $validated['position'],
+            'passport_number'   => $validated['passport_number'],
+            'TIN'               => $validated['TIN'],
+            'AEP_number'        => $validated['AEP_number'],
+            'expiry_date'       => $expiryDate,
+            'follow_up_date'    => $followUpDate,
+            'days_before_expiry'=> $daysBeforeExpiry,
+            'status'            => $validated['status'],
+            'user_id'           => auth()->id(),
         ]);
 
-        // Redirect back to the applications list with a success message
-        return redirect()->route('applications.index')->with('success', 'Application created successfully.');
+        LogHelper::logAction('Application', 'create', $application->id, [
+            'Created application' => $application->toArray()
+        ]);
+
+        return redirect()->route('applications.index')
+            ->with('success', 'Application created successfully.');
     }
 
     /**
-     * Show the form for editing the specified application.
-     *
-     * @param \App\Models\Application $application
-     * @return \Illuminate\View\View
+     * Edit an application.
      */
     public function edit(Application $application)
     {
@@ -120,78 +104,110 @@ class ApplicationController extends Controller
     }
 
     /**
-     * Update the specified application in the database.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\Application $application
-     * @return \Illuminate\Http\RedirectResponse
+     * Update an application.
      */
     public function update(Request $request, Application $application)
     {
-        // Validate the incoming data
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|string|in:New Application,Renewal Application,Cancellation and Downgrading',
-            'factory' => 'required|string|in:Device Factory,Medical Factory',
-            'position' => 'required|string|max:255',
+        $validated = $request->validate([
+            'name'            => 'required|string|max:255',
+            'type'            => 'required|string|in:New Application,Renewal Application,Cancellation and Downgrading',
+            'factory'         => 'required|string|in:Device Factory,Medical Factory',
+            'position'        => 'required|string|max:255',
             'passport_number' => 'nullable|string|max:255',
-            'TIN' => 'nullable|string|max:255',
-            'AEP_number' => 'nullable|string|max:255',
-            'expiry_date' => 'required|date',
-            'status' => 'required|string|in:Not Started,In Progress,Completed',
+            'TIN'             => 'nullable|string|max:255',
+            'AEP_number'      => 'nullable|string|max:255',
+            'expiry_date'     => 'required|date',
+            'status'          => 'required|string|in:Not Started,In Progress,Completed',
         ]);
 
-        // Calculate Follow-Up Date and Days Before Expiry
-        $expiry_date = Carbon::parse($request->expiry_date);
-        $follow_up_date = $expiry_date->copy()->subDays(92);
-        $days_before_expiry = max(0, Carbon::now()->diffInDays($expiry_date, false));
+        $oldData = $application->toArray();
 
-        // Update the application
+        $expiryDate       = Carbon::parse($validated['expiry_date']);
+        $followUpDate     = $expiryDate->copy()->subDays(92);
+        $daysBeforeExpiry = max(0, Carbon::now()->diffInDays($expiryDate, false));
+
         $application->update([
-            'name' => $request->name,
-            'application_type' => $request->type,
-            'factory' => $request->factory,
-            'position' => $request->position,
-            'passport_number' => $request->passport_number,
-            'TIN' => $request->TIN,
-            'AEP_number' => $request->AEP_number,
-            'expiry_date' => $expiry_date,
-            'follow_up_date' => $follow_up_date,
-            'days_before_expiry' => $days_before_expiry,
-            'status' => $request->status,
+            'name'              => $validated['name'],
+            'application_type'  => $validated['type'],
+            'factory'           => $validated['factory'],
+            'position'          => $validated['position'],
+            'passport_number'   => $validated['passport_number'],
+            'TIN'               => $validated['TIN'],
+            'AEP_number'        => $validated['AEP_number'],
+            'expiry_date'       => $expiryDate,
+            'follow_up_date'    => $followUpDate,
+            'days_before_expiry'=> $daysBeforeExpiry,
+            'status'            => $validated['status'],
         ]);
 
-        // Redirect back to the applications list with a success message
-        return redirect()->route('applications.index')->with('success', 'Application updated successfully.');
+        $newData = $application->toArray();
+
+        // Collect human-readable changes
+        $changes = [];
+        foreach ($newData as $field => $newValue) {
+            if (in_array($field, ['id','user_id','created_at','updated_at','deleted_at'])) {
+                continue; // skip system fields
+            }
+
+            $oldValue = $oldData[$field] ?? null;
+
+            // Format dates for readability
+            if (in_array($field, ['expiry_date', 'follow_up_date'])) {
+                $oldValue = $oldValue ? Carbon::parse($oldValue)->format('Y-m-d') : 'N/A';
+                $newValue = $newValue ? Carbon::parse($newValue)->format('Y-m-d') : 'N/A';
+            } else {
+                $oldValue = $oldValue ?: 'N/A';
+                $newValue = $newValue ?: 'N/A';
+            }
+
+            if ($oldValue != $newValue) {
+                $label = ucwords(str_replace('_', ' ', $field));
+                $changes[] = "{$label} changed from \"{$oldValue}\" to \"{$newValue}\"";
+            }
+        }
+
+        // Log changes with name
+        if (!empty($changes)) {
+            $description = $application->name . ': ' . implode('; ', $changes);
+
+            LogHelper::logAction(
+                'Application',
+                'update',
+                $application->id,
+                $description
+            );
+        }
+
+        return redirect()->route('applications.index')
+            ->with('success', 'Application updated successfully.');
     }
 
+
+
     /**
-     * Display the specified application.
-     *
-     * @param \App\Models\Application $application
-     * @return \Illuminate\View\View
+     * Show an application details.
      */
     public function show(Application $application)
     {
-        // Calculate Follow-Up Date and Days Before Expiry for the given application
-        $follow_up_date = Carbon::parse($application->expiry_date)->subDays(92);
-        $days_before_expiry = Carbon::now()->diffInDays($application->expiry_date, false);
+        $followUpDate     = Carbon::parse($application->expiry_date)->subDays(92);
+        $daysBeforeExpiry = Carbon::now()->diffInDays($application->expiry_date, false);
 
-        return view('applications.show', compact('application', 'follow_up_date', 'days_before_expiry'));
+        return view('applications.show', compact('application', 'followUpDate', 'daysBeforeExpiry'));
     }
 
     /**
-     * Remove the specified application from the database.
-     *
-     * @param \App\Models\Application $application
-     * @return \Illuminate\Http\RedirectResponse
+     * Delete an application.
      */
     public function destroy(Application $application)
     {
-        // Delete the application
+        $data = $application->toArray();
         $application->delete();
 
-        // Redirect back to the applications list with a success message
-        return redirect()->route('applications.index')->with('success', 'Application deleted successfully.');
+        LogHelper::logAction('Application', 'delete', $application->id, [
+            'Deleted application' => $data
+        ]);
+
+        return redirect()->route('applications.index')
+            ->with('success', 'Application deleted successfully.');
     }
 }

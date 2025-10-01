@@ -15,6 +15,8 @@ use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
+use App\Http\Controllers\AuditLogController;
+
 
 /*
 |---------------------------------------------------------------------------|
@@ -111,4 +113,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/', [ProfileController::class, 'update'])->name('update');
         Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
     });
+
+    /*
+    |---------------------------------------------------------------------------|
+    | Audit Logs                                                                 |
+    |---------------------------------------------------------------------------|
+    */
+    Route::middleware(['auth', 'verified', 'role:GA Staff'])->group(function () {
+        Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index');
+    });
+
 });
