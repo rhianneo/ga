@@ -43,10 +43,11 @@
         Filter
     </button>
 
-    <!-- Print Button -->
+    <!-- Print Button 
     <button type="button" onclick="window.print()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 ml-2">
         Print
     </button>
+    -->
 
     <!-- Create Application Button -->
     <a href="{{ route('applications.create') }}" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 ml-2">

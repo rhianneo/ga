@@ -93,23 +93,15 @@
 
 @push('styles')
 <style>
-    /* Tabs */
     .active-tab { background-color: #e0f7fa; color: #0288d1; border-color: #0288d1; }
     .inactive-tab { background-color: #fff; color: #607d8b; }
-
-    /* Minimum bar width for 1-day tasks */
-    .bar-wrapper rect.bar { min-width: 8px !important; }
-    .bar-wrapper rect.bar-progress { min-width: 8px !important; }
-
-    /* Bar Colors */
+    .bar-wrapper rect.bar, .bar-wrapper rect.bar-progress { min-width: 8px !important; }
     .bar-wrapper.bg-blue-500 rect.bar, .bar-wrapper.bg-blue-500 rect.bar-progress { fill: #59ddd2ff !important; }
     .bar-wrapper.bg-green-500 rect.bar, .bar-wrapper.bg-green-500 rect.bar-progress { fill: #8bc34a !important; }
     .bar-wrapper.bg-yellow-500 rect.bar, .bar-wrapper.bg-yellow-500 rect.bar-progress { fill: #ffeb3b !important; }
     .bar-wrapper.bg-red-500 rect.bar, .bar-wrapper.bg-red-500 rect.bar-progress { fill: #f44336 !important; }
     .bar-wrapper.bg-purple-500 rect.bar, .bar-wrapper.bg-purple-500 rect.bar-progress { fill: #9c27b0 !important; }
     .bar-wrapper:not([class*="bg-"]) rect.bar, .bar-wrapper:not([class*="bg-"]) rect.bar-progress { fill: #9e9e9e !important; }
-
-    /* Popup */
     .gantt-popup { background-color: #fff; border: 1px solid #ddd; padding: 12px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     .gantt-popup h5 { margin-bottom: 10px; font-size: 14px; font-weight: 600; color: #0288d1; }
     .gantt-popup p { margin: 0; font-size: 12px; color: #555; }
@@ -126,24 +118,18 @@ function initGantt(appId, data) {
 
     element.innerHTML = "";
 
-    const filteredTasks = data.tasks.filter(task => 
-        task.name !== "Job Vacancy Proof/Published (PESO, Sunstar, & PhilJobNet)"
-    );
-
-    new Gantt("#" + element.id, filteredTasks, {
+    new Gantt("#" + element.id, data.tasks, {
         view_mode: 'Day',
         date_format: 'YYYY-MM-DD',
         task_class: (task) => task.custom_class,
-        custom_popup_html: function(task) {
-            return `
-                <div class="gantt-popup">
-                    <h5>${task.name}</h5>
-                    <p>Start: ${task.start}</p>
-                    <p>End: ${task.end}</p>
-                    <p>Progress: ${task.progress}%</p>
-                </div>
-            `;
-        }
+        custom_popup_html: (task) => `
+            <div class="gantt-popup">
+                <h5>${task.name}</h5>
+                <p>Start: ${task.start}</p>
+                <p>End: ${task.end}</p>
+                <p>Progress: ${task.progress}%</p>
+            </div>
+        `
     });
 }
 

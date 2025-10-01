@@ -33,34 +33,37 @@ class GanttController extends Controller
             foreach ($application->processes as $process) {
                 $pivot = $process->pivot;
 
-                // Determine start and end
-                $start = $pivot->start_date;
-                $end   = $pivot->end_date ?? $pivot->start_date; // use start if end missing
-
-                // Skip exempted process
-                if ($process->sub_process === "Job Vacancy Proof/Published (PESO, Sunstar, & PhilJobNet)") {
+                // Skip exempted sub-process only for exempted positions
+                if (in_array($application->position, ['President & CEO', 'Vice President & COO']) &&
+                    $process->sub_process === "Job Vacancy Proof/Published (PESO, Sunstar, & PhilJobNet)") {
                     continue;
                 }
 
-                // Determine progress: 100 if completed, 0 if ongoing
+                // Only add task if start_date exists
+                if (!$pivot->start_date) {
+                    continue;
+                }
+
+                $start = $pivot->start_date;
+                $end   = $pivot->end_date ?? $pivot->start_date; // fallback to start if end missing
                 $progress = $pivot->end_date ? 100 : 0;
 
                 $tasks[] = [
-                    'id'            => 'process-' . $process->id,
-                    'name'          => $process->sub_process,
-                    'start'         => $start,
-                    'end'           => $end,
-                    'progress'      => $progress,
-                    'custom_class'  => $majorProcessColors[$process->major_process] ?? 'bg-gray-500',
+                    'id'           => 'process-' . $process->id,
+                    'name'         => $process->sub_process,
+                    'start'        => $start,
+                    'end'          => $end,
+                    'progress'     => $progress,
+                    'custom_class' => $majorProcessColors[$process->major_process] ?? 'bg-gray-500',
                 ];
             }
 
             $ganttData[$application->id] = [
-                'name'      => $application->full_name,
-                'type'      => $application->application_type,
-                'position'  => $application->position,
-                'expiry'    => $application->expiry_date->format('Y-m-d'),
-                'tasks'     => $tasks,
+                'name'     => $application->full_name,
+                'type'     => $application->application_type,
+                'position' => $application->position,
+                'expiry'   => $application->expiry_date->format('Y-m-d'),
+                'tasks'    => $tasks,
             ];
         }
 
